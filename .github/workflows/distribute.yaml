@@ -4,6 +4,7 @@ on:
     branches:
       - stable
       - master
+      - master-sirius-5-sign
     paths-ignore:
       - '**/README.md'
       - 'sirius_doc/**/*'
@@ -11,7 +12,8 @@ jobs:
   distCLI:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+#        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -53,7 +55,8 @@ jobs:
   distGUI:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [macos-latest]
+#        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -86,9 +89,66 @@ jobs:
             ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.pkg
             ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.deb
             ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.sha256
-  distMulti:
-    needs: distCLI
-    runs-on: ubuntu-latest
+#  distMulti:
+#    needs: distCLI
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up Zulu JDK
+#        uses: actions/setup-java@v1
+#        with:
+#          java-version: '15' # The JDK version to make available on the path.
+#          java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
+#          architecture: x64 # (x64 or x86) - defaults to x64
+#      - name: Load Build properties
+#        uses: Reedyuk/read-properties@v1.0.1
+#        id: sirius_version
+#        with:
+#          path: './sirius_cli/src/main/resources/sirius_frontend.build.properties'
+#          property: 'de.unijena.bioinf.siriusFrontend.version'
+#
+#      - uses: actions/download-artifact@v2
+#        with:
+#          name: "sirius-${{ steps.sirius_version.outputs.value }}-Linux-x86-64-headless-img"
+#          path: sirius_dist/sirius_cli_multi_os/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-Linux-x86-64-headless-img
+#      - uses: actions/download-artifact@v2
+#        with:
+#          name: "sirius-${{ steps.sirius_version.outputs.value }}-Windows-x86-64-headless-img"
+#          path: sirius_dist/sirius_cli_multi_os/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-Windows-x86-64-headless-img
+#      - uses: actions/download-artifact@v2
+#        with:
+#          name: "sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless-img"
+#          path: sirius_dist/sirius_cli_multi_os/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless-img
+#      - name: Display downloaded artifact files
+#        run: ls -lah
+#        working-directory: sirius_dist/sirius_cli_multi_os/build/tmp/artifacts/
+#
+#      - name: Gradle Build
+#        uses: eskatos/gradle-command-action@v1
+#        with:
+#          gradle-version: 6.9
+#          build-root-directory: sirius_dist/sirius_cli_multi_os
+#          arguments: publishSiriusPublicationToMavenLocal
+#      - name: Upload Distributions
+#        uses: actions/upload-artifact@v2
+#        with:
+#          retention-days: 1
+#          name: "sirius-${{ steps.sirius_version.outputs.value }}-multiOS-x86-64-headless"
+#          path: |
+#            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.zip
+#            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.sha256
+#      - name: Delete img artifacts
+#        uses: geekyeggo/delete-artifact@v1
+#        with:
+#          name: |
+#            sirius-${{ steps.sirius_version.outputs.value }}-Linux-x86-64-headless-img
+#            sirius-${{ steps.sirius_version.outputs.value }}-Windows-x86-64-headless-img
+#            sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless-img
+
+
+  macosSign:
+    needs: [ distCLI, disGUI ]
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set up Zulu JDK
@@ -97,6 +157,7 @@ jobs:
           java-version: '15' # The JDK version to make available on the path.
           java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
           architecture: x64 # (x64 or x86) - defaults to x64
+
       - name: Load Build properties
         uses: Reedyuk/read-properties@v1.0.1
         id: sirius_version
@@ -106,44 +167,40 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: "sirius-${{ steps.sirius_version.outputs.value }}-Linux-x86-64-headless-img"
-          path: sirius_dist/sirius_cli_multi_os/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-Linux-x86-64-headless-img
+          name: "sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless"
+          path: sirius_dist/build/tmp/artifacts/
       - uses: actions/download-artifact@v2
         with:
-          name: "sirius-${{ steps.sirius_version.outputs.value }}-Windows-x86-64-headless-img"
-          path: sirius_dist/sirius_cli_multi_os/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-Windows-x86-64-headless-img
-      - uses: actions/download-artifact@v2
-        with:
-          name: "sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless-img"
-          path: sirius_dist/sirius_cli_multi_os/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless-img
+          name: "sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64"
+          path: sirius_dist/build/tmp/artifacts/
       - name: Display downloaded artifact files
         run: ls -lah
-        working-directory: sirius_dist/sirius_cli_multi_os/build/tmp/artifacts/
+        working-directory: sirius_dist/build/tmp/artifacts/
 
-      - name: Gradle Build
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.9
-          build-root-directory: sirius_dist/sirius_cli_multi_os
-          arguments: publishSiriusPublicationToMavenLocal
-      - name: Upload Distributions
-        uses: actions/upload-artifact@v2
-        with:
-          retention-days: 1
-          name: "sirius-${{ steps.sirius_version.outputs.value }}-multiOS-x86-64-headless"
-          path: |
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.zip
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.sha256
-      - name: Delete img artifacts
-        uses: geekyeggo/delete-artifact@v1
-        with:
-          name: |
-            sirius-${{ steps.sirius_version.outputs.value }}-Linux-x86-64-headless-img
-            sirius-${{ steps.sirius_version.outputs.value }}-Windows-x86-64-headless-img
-            sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless-img
+      # Install dependencies and build you app here #
+      # - name: Build executable
+      #     run: ---
+
+      - name: Codesign executable
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_TMP_KEYCHAIN_PWD: ${{ secrets.MACOS_TMP_KEYCHAIN_PWD }}
+          MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
+        working-directory: sirius_dist/build/tmp/artifacts/
+        run: |
+          echo $MACOS_CERTIFICATE | base64 —decode > certificate.p12
+          security create-keychain -p $MACOS_TMP_KEYCHAIN_PWD build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p $MACOS_TMP_KEYCHAIN_PWD build.keychain
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_TMP_KEYCHAIN_PWD build.keychain
+          /usr/bin/codesign --force -s <identity-id> ./sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg -v
+          ls -lah
+          
 
   release:
-    needs: [distCLI, distGUI, distMulti]
+    needs: [ distCLI, distGUI, distMulti, macosSign]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
