@@ -147,7 +147,7 @@ jobs:
 
 
   macosSign:
-    needs: [ distCLI, disGUI ]
+    needs: [ distCLI, distGUI ]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
