@@ -200,7 +200,8 @@ jobs:
           
 
   release:
-    needs: [ distCLI, distGUI, distMulti, macosSign]
+#    needs: [ distCLI, distGUI, distMulti, macosSign]
+    needs: [ distCLI, distGUI, macosSign]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
