@@ -192,8 +192,8 @@ jobs:
         run: /usr/bin/security find-identity -p codesigning
       - name: Codesign pkg package
         run: |
-          /usr/bin/codesign -s ${{ secrets.MACOS_IDENTITY_ID }} ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg -v
-          /usr/bin/codesign -s ${{ secrets.MACOS_IDENTITY_ID }} ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg -v
+          /usr/bin/codesign -s "${{ secrets.MACOS_IDENTITY_ID }}" ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg -v
+          /usr/bin/codesign -s "${{ secrets.MACOS_IDENTITY_ID }}" ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg -v
       - name: Display signed artifact files
         run: ls -lah ./sirius_dist/build/tmp/artifacts
 
