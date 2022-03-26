@@ -181,7 +181,7 @@ jobs:
       # - name: Build executable
       #     run: ---
 
-      - name: Codesign executable
+      - name: Codesign pkg package
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
@@ -189,14 +189,11 @@ jobs:
           MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
         working-directory: sirius_dist/build/tmp/artifacts/
         run: |
-          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
-          security create-keychain -p $MACOS_TMP_KEYCHAIN_PWD build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p $MACOS_TMP_KEYCHAIN_PWD build.keychain
-          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_TMP_KEYCHAIN_PWD build.keychain
-          /usr/bin/codesign --force -s <identity-id> ./sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg -v
-          ls -lah
+          zsh .github/scripts/mac-create-identity.zsh
+          /usr/bin/codesign --force -s $MACOS_IDENTITY_ID ./sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg -v
+          /usr/bin/codesign --force -s $MACOS_IDENTITY_ID ./sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg -v
+      - name: Display signed artifact files
+        run: ls -lah
           
 
   release:
