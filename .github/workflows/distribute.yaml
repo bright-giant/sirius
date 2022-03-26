@@ -193,7 +193,7 @@ jobs:
 #          MACOS_TMP_KEYCHAIN_PWD: ${{ secrets.MACOS_TMP_KEYCHAIN_PWD }}
 #          MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
         run: |
-          zsh .github/scripts/mac-create-identity.zsh
+          /usr/bin/security find-identity
           /usr/bin/codesign --force -s ${{ secrets.MACOS_IDENTITY_ID }} ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg -v
           /usr/bin/codesign --force -s ${{ secrets.MACOS_IDENTITY_ID }} ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg -v
       - name: Display signed artifact files
