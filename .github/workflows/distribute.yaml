@@ -181,16 +181,21 @@ jobs:
       # - name: Build executable
       #     run: ---
 
+      - name: Import Apple Code-signing
+        uses: apple-actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+          p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
       - name: Codesign pkg package
-        env:
-          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-          MACOS_TMP_KEYCHAIN_PWD: ${{ secrets.MACOS_TMP_KEYCHAIN_PWD }}
-          MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
+#        env:
+#          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+#          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+#          MACOS_TMP_KEYCHAIN_PWD: ${{ secrets.MACOS_TMP_KEYCHAIN_PWD }}
+#          MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
         run: |
           zsh .github/scripts/mac-create-identity.zsh
-          /usr/bin/codesign --force -s $MACOS_IDENTITY_ID ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg -v
-          /usr/bin/codesign --force -s $MACOS_IDENTITY_ID ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg -v
+          /usr/bin/codesign --force -s ${{ secrets.MACOS_IDENTITY_ID }} ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg -v
+          /usr/bin/codesign --force -s ${{ secrets.MACOS_IDENTITY_ID }} ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg -v
       - name: Display signed artifact files
         run: ls -lah
           
