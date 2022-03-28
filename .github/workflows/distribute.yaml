@@ -203,7 +203,7 @@ jobs:
           MACOS_APPLE_ID: ${{ secrets.MACOS_APPLE_ID }}
           MACOS_APPLE_ID_PW: ${{ secrets.MACOS_APPLE_ID_PW }}
           APP_NAME: "sirius"
-        run: ./github/scripts/mac-create-identity.zsh
+        run: zsh ./.github/scripts/mac-create-identity.zsh
       - name: Display signed artifact files
         run: ls -lah ./sirius_dist/build/tmp/artifacts
       - name: Upload Distributions
