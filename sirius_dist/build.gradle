@@ -559,24 +559,20 @@ abstract class AppImage extends DefaultTask {
 
         if (signID != null && !signID.isBlank()) {
             println "Signing native libs dir"
-            getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles().toList()
-                    .forEach(f -> {
-                        project.exec {
-                            commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
-                                         "${f.getAbsolutePath()}"])
-                        }
-                    })
+            for (File f : getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles().toList()) {
+                project.exec {
+                    commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
+                                 "${f.getAbsolutePath()}"])
+                }
+            }
 
             println "Signing jars dir"
-            getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ f -> f.getName().endsWith(".jar") } as FileFilter).toList()
-                    .forEach(f -> {
-                        project.exec {
-                            commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
-                                         "${f.getAbsolutePath()}"])
-                        }
-
-
-                    })
+            for (File f : getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ f -> f.getName().endsWith(".jar") } as FileFilter).toList()) {
+                project.exec {
+                    commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
+                                 "${f.getAbsolutePath()}"])
+                }
+            }
 
             println "Signing .app dir"
             project.exec {
