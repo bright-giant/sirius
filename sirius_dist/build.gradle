@@ -556,7 +556,7 @@ abstract class AppImage extends DefaultTask {
         }
 
         def signID = System.getenv("MACOS_APP_IDENTITY_ID")
-        def entitlementsFile = rootProject.getProjectDir().toPath().resolve("dist").resolve("macos.entitlements").toFile()
+        def entitlementsFile = getRootProject().getProjectDir().toPath().resolve("dist").resolve("macos.entitlements").toFile()
 
         if (signID != null && !signID.isBlank()) {
             println "Signing native libs dir"
