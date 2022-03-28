@@ -204,9 +204,6 @@ jobs:
           MACOS_APPLE_ID_PW: ${{ secrets.MACOS_APPLE_ID_PW }}
           APP_NAME: "sirius"
         run: ./github/scripts/mac-create-identity.zsh
-#        run: |
-#          /usr/bin/productsign --timestamp --sign "$MACOS_IDENTITY_ID" ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-osx64.pkg  ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64.pkg
-#          /usr/bin/productsign --timestamp --sign "$MACOS_IDENTITY_ID" ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-osx64-headless.pkg ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg
       - name: Display signed artifact files
         run: ls -lah ./sirius_dist/build/tmp/artifacts
       - name: Upload Distributions
@@ -214,9 +211,9 @@ jobs:
         with:
           retention-days: 1
           name: "sirius-${{ steps.sirius_version.outputs.value }}-${{ runner.os }}-x86-64_SIGNED"
-          path: |
+          path: ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg
 #            ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64.pkg
-            ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg
+#            ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg
   release:
 #    needs: [ distCLI, distGUI, distMulti, macosSign]
     needs: [ distCLI, macosSign]
