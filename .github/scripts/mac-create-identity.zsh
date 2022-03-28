@@ -8,7 +8,7 @@
 #codesign -s "Developer ID Application: Rok Strnisa (73XQUXV944)" --options runtime --entitlements macos.entitlements -vvvv --deep Unattach-$VERSION.dmg
 #sign pkg
 #/usr/bin/productsign --timestamp --sign '"'"$MACOS_IDENTITY_ID"'"' ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-osx64.pkg  ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64.pkg
-APP_PATH = "./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg"
+APP_PATH="./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg"
 
 /usr/bin/productsign --timestamp --sign "$MACOS_IDENTITY_ID" ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-osx64-headless.pkg "$APP_PATH"
 
