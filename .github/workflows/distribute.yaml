@@ -153,7 +153,7 @@ jobs:
     runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Zulu JDK
+#      - name: Set up Zulu JDK
 #        uses: actions/setup-java@v1
 #        with:
 #          java-version: '15' # The JDK version to make available on the path.
