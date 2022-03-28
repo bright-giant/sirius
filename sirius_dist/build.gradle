@@ -559,7 +559,8 @@ abstract class AppImage extends DefaultTask {
 
         if (signID != null && !signID.isBlank()) {
             println "Signing native libs dir"
-            for (File f : getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles().toList()) {
+            for (File f : getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles()) {
+                println("Signing native lib '$f'")
                 project.exec {
                     commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
                                  "${f.getAbsolutePath()}"])
@@ -567,7 +568,8 @@ abstract class AppImage extends DefaultTask {
             }
 
             println "Signing jars dir"
-            for (File f : getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ file -> file.getName().endsWith(".jar") } as FileFilter).toList()) {
+            for (File f : getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ file -> file.getName().endsWith(".jar") } as FileFilter)) {
+                println("Signing jar '$f'")
                 project.exec {
                     commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
                                  "${f.getAbsolutePath()}"])
