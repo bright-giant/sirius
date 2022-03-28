@@ -558,19 +558,27 @@ abstract class AppImage extends DefaultTask {
         def signID = System.getenv("MACOS_APP_IDENTITY_ID")
 
         if (signID != null && !signID.isBlank()) {
-            println "Signign native libs dir"
-            project.exec {
-                commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
-                             "${getImageDir().toPath().resolve("Contents").resolve("native").toFile()}"])
-            }
+            println "Signing native libs dir"
+            getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles().toList()
+                    .forEach(f -> {
+                        project.exec {
+                            commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
+                                         "${f.getAbsolutePath()}"])
+                        }
+                    })
 
-            println "Signign native libs dir"
-            project.exec {
-                commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
-                             "${getImageDir().toPath().resolve("Contents").resolve("app").toFile()}"])
-            }
+            println "Signing jars dir"
+            getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ f -> f.getName().endsWith(".jar") } as FileFilter).toList()
+                    .forEach(f -> {
+                        project.exec {
+                            commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
+                                         "${f.getAbsolutePath()}"])
+                        }
 
-            println "Signign .app dir"
+
+                    })
+
+            println "Signing .app dir"
             project.exec {
                 commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
                              "${getImageDir()}"])
