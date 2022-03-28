@@ -606,7 +606,11 @@ abstract class AppImage extends DefaultTask {
             def signID = System.getenv("MACOS_APP_IDENTITY_ID")
             if (signID != null && !signID.isBlank()) {
                 paras += []
-                paras += ['--mac-sign', '--mac-signing-key-user-name', "\"${signID}\""]
+                paras += [
+                        '--mac-sign',
+                        '--mac-signing-key-user-name', "\"${signID}\"",
+                        '--mac-signing-keychain', System.getenv("MACOS_KEYCHAIN")
+                ]
             } else {
                 println "Could not find ID for signing. APP image will not be signed!"
             }
