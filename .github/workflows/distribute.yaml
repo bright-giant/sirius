@@ -203,9 +203,22 @@ jobs:
           MACOS_APPLE_ID: ${{ secrets.MACOS_APPLE_ID }}
           MACOS_APPLE_ID_PW: ${{ secrets.MACOS_APPLE_ID_PW }}
           APP_NAME: "sirius"
-        run: zsh ./.github/scripts/mac-create-identity.zsh
+          APP_PATH_TARGET: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg"
+          APP_PATH_SOURCE: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-osx64-headless.pkg"
+        run: /usr/bin/productsign --timestamp --sign "$MACOS_IDENTITY_ID" "APP_PATH_SOURCE" "$APP_PATH_TARGET"
       - name: Display signed artifact files
         run: ls -lah ./sirius_dist/build/tmp/artifacts
+      - name: "Notarize Release Build"
+        uses: devbotsxyz/xcode-notarize@v1
+        with:
+          product-path: "$APP_PATH_TARGET"
+          appstore-connect-username: ${{ secrets.MACOS_APPLE_ID }}
+          appstore-connect-password: ${{ secrets.MACOS_APPLE_ID_PW }}
+      - name: "Staple Release Build"
+        uses: devbotsxyz/xcode-staple@v1
+        with:
+          product-path: "$APP_PATH_TARGET"
+
       - name: Upload Distributions
         uses: actions/upload-artifact@v2
         with:
