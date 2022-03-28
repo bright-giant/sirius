@@ -213,7 +213,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           retention-days: 1
-          name: "sirius-$VERSION-${{ runner.os }}-x86-64_SIGNED"
+          name: "sirius-${{ steps.sirius_version.outputs.value }}-${{ runner.os }}-x86-64_SIGNED"
           path: |
 #            ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64.pkg
             ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg
