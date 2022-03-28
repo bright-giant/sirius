@@ -20,7 +20,7 @@ jobs:
       - name: Set up Zulu JDK
         uses: actions/setup-java@v1
         with:
-          java-version: '15' # The JDK version to make available on the path.
+          java-version: '16' # The JDK version to make available on the path.
           java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
           architecture: x64 # (x64 or x86) - defaults to x64
       - name: Load Build properties
@@ -29,8 +29,17 @@ jobs:
         with:
           path: './sirius_cli/src/main/resources/sirius_frontend.build.properties'
           property: 'de.unijena.bioinf.siriusFrontend.version'
+      - name: Import Apple APP Code-signing ID and p12
+        uses: apple-actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.MACOS_APP_CERTIFICATE }}
+          p12-password: ${{ secrets.MACOS_APP_CERTIFICATE_PWD }}
+      - name: Check Identities
+        run: /usr/bin/security find-identity
       - name: Gradle Build
         uses: eskatos/gradle-command-action@v1
+        env:
+          MACOS_APP_IDENTITY_ID: ${{ secrets.MACOS_APP_IDENTITY_ID }}
         with:
           gradle-version: 6.9
           build-root-directory: sirius_dist/sirius_cli_single_os
@@ -190,8 +199,6 @@ jobs:
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
       - name: Check Identities
         run: /usr/bin/security find-identity
-      - name: Check Identities with code signing capabilities
-        run: /usr/bin/security find-identity -p codesigning
 
       # using productsign hopefully covers signature of internal .app stuff.
       - name: Codesign pkg package
