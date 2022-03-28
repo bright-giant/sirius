@@ -152,13 +152,13 @@ jobs:
     needs: [ distCLI ]
     runs-on: macos-10.15
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Zulu JDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: '15' # The JDK version to make available on the path.
-          java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
-          architecture: x64 # (x64 or x86) - defaults to x64
+#      - uses: actions/checkout@v2
+#      - name: Set up Zulu JDK
+#        uses: actions/setup-java@v1
+#        with:
+#          java-version: '15' # The JDK version to make available on the path.
+#          java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
+#          architecture: x64 # (x64 or x86) - defaults to x64
 
       - name: Load Build properties
         uses: Reedyuk/read-properties@v1.0.1
@@ -205,7 +205,7 @@ jobs:
           APP_NAME: "sirius"
           APP_PATH_TARGET: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg"
           APP_PATH_SOURCE: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-osx64-headless.pkg"
-        run: /usr/bin/productsign --timestamp --sign "$MACOS_IDENTITY_ID" "APP_PATH_SOURCE" "$APP_PATH_TARGET"
+        run: /usr/bin/productsign --timestamp --sign "$MACOS_IDENTITY_ID" "$APP_PATH_SOURCE" "$APP_PATH_TARGET"
       - name: Display signed artifact files
         run: ls -lah ./sirius_dist/build/tmp/artifacts
       - name: "Notarize Release Build"
