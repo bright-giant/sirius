@@ -1,6 +1,24 @@
-echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
-security create-keychain -p $MACOS_TMP_KEYCHAIN_PWD build.keychain
-security default-keychain -s build.keychain
-security unlock-keychain -p $MACOS_TMP_KEYCHAIN_PWD build.keychain
-security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
-security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_TMP_KEYCHAIN_PWD build.keychain
+./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg
+./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg
+#rm -rf ./*.dmg
+#jpackage --name Unattach --app-version $VERSION --description "$DESCRIPTION" --vendor "$VENDOR" --copyright "$COPYRIGHT" \
+#    --license-file LICENSE \
+#    --type dmg --app-image Unattach.app
+# Sign DMG.
+#codesign -s "Developer ID Application: Rok Strnisa (73XQUXV944)" --options runtime --entitlements macos.entitlements -vvvv --deep Unattach-$VERSION.dmg
+#sign pkg
+#/usr/bin/productsign --timestamp --sign '"'"$MACOS_IDENTITY_ID"'"' ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-osx64.pkg  ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64.pkg
+/usr/bin/productsign --timestamp --sign '"'"$MACOS_IDENTITY_ID"'"' ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-osx64-headless.pkg ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg
+# Upload pkg for verification.
+REQUEST_UUID=$(xcrun altool --notarize-app --primary-bundle-id "app.$APP_NAME-$VERSION" -u "$" -p "$MACOS_IDENTITY_ID" --file./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg | grep RequestUUID | awk '{print $3}')
+# Wait for verification to complete.
+while xcrun altool --notarization-info "$REQUEST_UUID" -u "$MACOS_APPLE_ID" -p "$MACOS_IDENTITY_ID" | grep "Status: in progress" > /dev/null; do
+  echo "Verification in progress..."
+  sleep 30
+done
+# Attach stamp to the pkg.
+xcrun stapler staple Unattach-$VERSION.dmg
+# Check APP and pkg.
+spctl -vvv --assess --type exec Unattach.app
+codesign -vvv --deep --strict Unattach-$VERSION.dmg
+codesign -dvv Unattach-$VERSION.dmg

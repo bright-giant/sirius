@@ -52,43 +52,45 @@ jobs:
             ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.pkg
             ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.deb
             ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.sha256
-  distGUI:
-    strategy:
-      matrix:
-        os: [macos-latest]
-#        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Zulu JDK-FX
-        uses: actions/setup-java@v1
-        with:
-          java-version: '15' # The JDK version to make available on the path.
-          java-package: jdk+fx # (jre, jdk, or jdk+fx) - defaults to jdk
-          architecture: x64 # (x64 or x86) - defaults to x64
-      - name: Load Build properties
-        uses: Reedyuk/read-properties@v1.0.1
-        id: sirius_version
-        with:
-          path: './sirius_cli/src/main/resources/sirius_frontend.build.properties'
-          property: 'de.unijena.bioinf.siriusFrontend.version'
-      - name: Gradle Build
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.9
-          build-root-directory: sirius_dist/sirius_gui_single_os
-          arguments: clean publishSiriusPublicationToMavenLocal
-      - name: Upload Distributions
-        uses: actions/upload-artifact@v2
-        with:
-          retention-days: 1
-          name: "sirius-${{ steps.sirius_version.outputs.value }}-${{ runner.os }}-x86-64"
-          path: |
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.zip
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.msi
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.pkg
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.deb
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.sha256
+#  distGUI:
+#    strategy:
+#      matrix:
+#        os: [macos-latest]
+##        os: [ubuntu-latest, windows-latest, macos-latest]
+#    runs-on: ${{ matrix.os }}
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up Zulu JDK-FX
+#        uses: actions/setup-java@v1
+#        with:
+#          java-version: '15' # The JDK version to make available on the path.
+#          java-package: jdk+fx # (jre, jdk, or jdk+fx) - defaults to jdk
+#          architecture: x64 # (x64 or x86) - defaults to x64
+#      - name: Load Build properties
+#        uses: Reedyuk/read-properties@v1.0.1
+#        id: sirius_version
+#        with:
+#          path: './sirius_cli/src/main/resources/sirius_frontend.build.properties'
+#          property: 'de.unijena.bioinf.siriusFrontend.version'
+#      - name: Gradle Build
+#        uses: eskatos/gradle-command-action@v1
+#        with:
+#          gradle-version: 6.9
+#          build-root-directory: sirius_dist/sirius_gui_single_os
+#          arguments: clean publishSiriusPublicationToMavenLocal
+#      - name: Upload Distributions
+#        uses: actions/upload-artifact@v2
+#        with:
+#          retention-days: 1
+#          name: "sirius-${{ steps.sirius_version.outputs.value }}-${{ runner.os }}-x86-64"
+#          path: |
+#            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.zip
+#            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.msi
+#            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.pkg
+#            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.deb
+#            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.sha256
+
+
 #  distMulti:
 #    needs: distCLI
 #    runs-on: ubuntu-latest
@@ -147,7 +149,7 @@ jobs:
 
 
   macosSign:
-    needs: [ distCLI, distGUI ]
+    needs: [ distCLI ]
     runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2
@@ -169,10 +171,10 @@ jobs:
         with:
           name: "sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless"
           path: sirius_dist/build/tmp/artifacts/
-      - uses: actions/download-artifact@v2
-        with:
-          name: "sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64"
-          path: sirius_dist/build/tmp/artifacts/
+#      - uses: actions/download-artifact@v2
+#        with:
+#          name: "sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64"
+#          path: sirius_dist/build/tmp/artifacts/
       - name: Display downloaded artifact files
         run: ls -lah
         working-directory: sirius_dist/build/tmp/artifacts/
@@ -190,23 +192,34 @@ jobs:
         run: /usr/bin/security find-identity
       - name: Check Identities with code signing capabilities
         run: /usr/bin/security find-identity -p codesigning
+
       - name: Codesign pkg package
-        run: |
-          /usr/bin/productsign --timestamp --sign "${{ secrets.MACOS_IDENTITY_ID }}" ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-osx64.pkg  ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg
-          /usr/bin/productsign --timestamp --sign "${{ secrets.MACOS_IDENTITY_ID }}" ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-osx64-headless.pkg ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg
+        env:
+          VERSION: ${{ steps.sirius_version.outputs.value }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_TMP_KEYCHAIN_PWD: ${{ secrets.MACOS_TMP_KEYCHAIN_PWD }}
+          MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
+          MACOS_APPLE_ID: ${{ secrets.MACOS_APPLE_ID }}
+          MACOS_APPLE_ID_PW: ${{ secrets.MACOS_APPLE_ID_PW }}
+          APP_NAME: "sirius"
+        run: ./github/scripts/mac-create-identity.zsh
+#        run: |
+#          /usr/bin/productsign --timestamp --sign "$MACOS_IDENTITY_ID" ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-osx64.pkg  ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64.pkg
+#          /usr/bin/productsign --timestamp --sign "$MACOS_IDENTITY_ID" ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-osx64-headless.pkg ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg
       - name: Display signed artifact files
         run: ls -lah ./sirius_dist/build/tmp/artifacts
       - name: Upload Distributions
         uses: actions/upload-artifact@v2
         with:
           retention-days: 1
-          name: "sirius-${{ steps.sirius_version.outputs.value }}-${{ runner.os }}-x86-64_SIGNED"
+          name: "sirius-$VERSION-${{ runner.os }}-x86-64_SIGNED"
           path: |
-            ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg
-            ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg
+#            ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64.pkg
+            ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg
   release:
 #    needs: [ distCLI, distGUI, distMulti, macosSign]
-    needs: [ distCLI, distGUI, macosSign]
+    needs: [ distCLI, macosSign]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
