@@ -24,6 +24,6 @@ done
 # Attach stamp to the pkg.
 xcrun stapler staple "$APP_PATH"
 # Check APP and pkg.
-#spctl -vvv --assess --type exec sirius.app
+spctl -a -t install -vvv "$APP_PATH"
 codesign -vvv --deep --strict "$APP_PATH"
 codesign -dvv "$APP_PATH"
