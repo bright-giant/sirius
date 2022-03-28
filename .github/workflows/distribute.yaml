@@ -40,6 +40,7 @@ jobs:
         uses: eskatos/gradle-command-action@v1
         env:
           MACOS_APP_IDENTITY_ID: ${{ secrets.MACOS_APP_IDENTITY_ID }}
+          MACOS_KEYCHAIN: "signing_temp.keychain"
         with:
           gradle-version: 6.9
           build-root-directory: sirius_dist/sirius_cli_single_os
@@ -210,7 +211,6 @@ jobs:
           MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
           MACOS_APPLE_ID: ${{ secrets.MACOS_APPLE_ID }}
           MACOS_APPLE_ID_PW: ${{ secrets.MACOS_APPLE_ID_PW }}
-          MACOS_KEYCHAIN: "signing_temp.keychain"
           APP_NAME: "sirius"
           APP_PATH_TARGET: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg"
           APP_PATH_SOURCE: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-osx64-headless.pkg"
