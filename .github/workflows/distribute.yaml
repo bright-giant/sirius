@@ -193,6 +193,7 @@ jobs:
       - name: Check Identities with code signing capabilities
         run: /usr/bin/security find-identity -p codesigning
 
+      # using productsign hopefully covers signature of internal .app stuff.
       - name: Codesign pkg package
         env:
           VERSION: ${{ steps.sirius_version.outputs.value }}
@@ -206,13 +207,15 @@ jobs:
           APP_PATH_TARGET: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg"
           APP_PATH_SOURCE: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-osx64-headless.pkg"
         run: /usr/bin/productsign --timestamp --sign "$MACOS_IDENTITY_ID" "$APP_PATH_SOURCE" "$APP_PATH_TARGET"
+
       - name: Display signed artifact files
         run: ls -lah ./sirius_dist/build/tmp/artifacts
       - name: "Notarize Release Build"
-        uses: devbotsxyz/xcode-notarize@v1
+        uses: GuillaumeFalourd/xcode-notarize@v1
         with:
           product-path: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg"
           primary-bundle-id: "sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg"
+          verbose: true
           appstore-connect-username: ${{ secrets.MACOS_APPLE_ID }}
           appstore-connect-password: ${{ secrets.MACOS_APPLE_ID_PW }}
       - name: "Staple Release Build"
