@@ -554,6 +554,30 @@ abstract class AppImage extends DefaultTask {
             println c
             commandLine(c)
         }
+
+        def signID = System.getenv("MACOS_APP_IDENTITY_ID")
+
+        if (signID != null && !signID.isBlank()) {
+            println "Signign native libs dir"
+            project.exec {
+                commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
+                             "${getImageDir().toPath().resolve("Contents").resolve("native").toFile()}"])
+            }
+
+            println "Signign native libs dir"
+            project.exec {
+                commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
+                             "${getImageDir().toPath().resolve("Contents").resolve("app").toFile()}"])
+            }
+
+            println "Signign .app dir"
+            project.exec {
+                commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
+                             "${getImageDir()}"])
+            }
+        } else {
+            println "Could not find ID for signing. APP image will not be signed!"
+        }
     }
 
     def buildCommand(String[] parameters) {
@@ -603,7 +627,7 @@ abstract class AppImage extends DefaultTask {
             paras += ["--icon", "${iconDir.resolve('sirius-icon.icns').toString()}"]
             if (macPackageName != null && !macPackageName.isBlank())
                 paras += ['--mac-package-name', "\"$macPackageName\""]
-            def signID = System.getenv("MACOS_APP_IDENTITY_ID")
+            /*def signID = System.getenv("MACOS_APP_IDENTITY_ID")
             if (signID != null && !signID.isBlank()) {
                 paras += []
                 paras += [
@@ -613,7 +637,7 @@ abstract class AppImage extends DefaultTask {
                 ]
             } else {
                 println "Could not find ID for signing. APP image will not be signed!"
-            }
+            }*/
 
         } else if (project.OS.isLinux()) {
             paras += ["--icon", "${iconDir.resolve('sirius-icon.png').toString()}"]
