@@ -1,6 +1,7 @@
 import org.gradle.crypto.checksum.Checksum
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
+import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.stream.Collectors
@@ -454,15 +455,14 @@ subprojects {
                     def entitlementsFile = getRootProject().getProjectDir().toPath().resolve("dist").resolve("macos.entitlements").toFile()
                     def additionalLibs = [new File(distImage.getImageDir(), "runtime/Contents/MacOS/libjli.dylib")]
                     def jarNestedLibs = [
-                            new URI("jar:file:${distImage.getImageDir().toPath().resolve("Contents").resolve("app").resolve("jni-inchi-0.8.jar").toFile().getAbsolutePath()}!/META-INF/jniinchi/1.03_1/MAC-X86_64/JniInchi-1.03_1-MAC-X86_64")]
+                            FileSystems.newFileSystem(distImage.getImageDir().toPath().resolve("Contents").resolve("app").resolve("jni-inchi-0.8.jar"))
+                                    .getPath("META-INF/jniinchi/1.03_1/MAC-X86_64/JniInchi-1.03_1-MAC-X86_64")
+                    ]
 
                     getLogger().lifecycle("extract libs nested in jars")
                     def extractedLibs = getBuildDir().toPath().resolve("tmp").resolve("jarLibs")
-                    for (URI f : jarNestedLibs) {
-                        def source = Paths.get(f);
-                        Files.copy(source, extractedLibs.resolve(source.getFileName()))
-                    }
-
+                    for (def inJar : jarNestedLibs)
+                        Files.copy(inJar, extractedLibs.resolve(inJar.getFileName().toString()))
 
                     getLogger().lifecycle("Signing native libs dir")
                     for (File f : distImage.getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles() + additionalLibs + extractedLibs.toFile().listFiles()) {
@@ -474,11 +474,8 @@ subprojects {
                     }
 
                     getLogger().lifecycle("Reinsert libs nested in jars")
-                    for (URI f : jarNestedLibs) {
-                        def target = Paths.get(f);
-                        Files.copy(extractedLibs.resolve(target.getFileName()), target)
-                    }
-
+                    for (def inJar : jarNestedLibs)
+                        Files.copy(extractedLibs.resolve(inJar.getFileName().toString()), inJar)
 
                     getLogger().lifecycle("Signing jars dir")
                     for (File f : distImage.getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ file -> file.getName().endsWith(".jar") } as FileFilter)) {
