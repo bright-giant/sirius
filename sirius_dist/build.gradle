@@ -4,6 +4,7 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import java.util.stream.Collectors
 
 plugins {
@@ -477,7 +478,7 @@ subprojects {
 
                     getLogger().lifecycle("Reinsert libs nested in jars")
                     for (def inJar : jarNestedLibs)
-                        Files.copy(extractedLibs.resolve(inJar.getFileName().toString()), inJar)
+                        Files.copy(extractedLibs.resolve(inJar.getFileName().toString()), inJar, StandardCopyOption.REPLACE_EXISTING)
 
                     getLogger().lifecycle("Signing jars dir")
                     for (File f : distImage.getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ file -> file.getName().endsWith(".jar") } as FileFilter)) {
