@@ -580,7 +580,7 @@ abstract class AppImage extends DefaultTask {
 
             println "Signing .app dir"
             project.exec {
-                commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "macos.entitlements", "-f", "-v",
+                commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "${entitlementsFile.getAbsolutePath()}", "-f", "-v",
                              "${getImageDir()}"])
             }
         } else {
