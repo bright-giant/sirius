@@ -453,7 +453,7 @@ subprojects {
                 def signID = System.getenv("MACOS_APP_IDENTITY_ID")
                 if (signID != null && !signID.isBlank()) {
                     def entitlementsFile = getRootProject().getProjectDir().toPath().resolve("dist").resolve("macos.entitlements").toFile()
-                    def additionalLibs = [new File(distImage.getImageDir(), "runtime/Contents/MacOS/libjli.dylib")]
+                    def additionalLibs = [new File(distImage.getImageDir(), "Contents/runtime/Contents/MacOS/libjli.dylib")]
                     def jarNestedLibs = [
                             FileSystems.newFileSystem(distImage.getImageDir().toPath().resolve("Contents").resolve("app").resolve("jni-inchi-0.8.jar"))
                                     .getPath("META-INF/jniinchi/1.03_1/MAC-X86_64/JniInchi-1.03_1-MAC-X86_64")
