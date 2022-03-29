@@ -320,21 +320,26 @@ subprojects {
             File appRootTarget
             File launcherTarget
             File libTarget
+            File resourceTarget
             if (OS.isLinux()) {
                 appRootTarget = outputDir.toPath().resolve(imageName).toFile()
                 nativeLibsTarget = appRootTarget.toPath().resolve("lib/native").toFile()
                 launcherTarget = appRootTarget.toPath().resolve("bin").toFile()
                 libTarget = appRootTarget.toPath().resolve("lib/app").toFile()
+                resourceTarget = appRootTarget
             } else if (OS.isWindows()) {
                 appRootTarget = outputDir.toPath().resolve(imageName).toFile()
                 nativeLibsTarget = appRootTarget
                 launcherTarget = appRootTarget
                 libTarget = appRootTarget.toPath().resolve("app").toFile()
+                resourceTarget = appRootTarget
             } else if (OS.isMacOsX()) {
                 appRootTarget = outputDir.toPath().resolve("${imageName}.app/Contents").toFile()
                 nativeLibsTarget = appRootTarget.toPath().resolve("native").toFile()
                 launcherTarget = appRootTarget.toPath().resolve("MacOS").toFile()
                 libTarget = appRootTarget.toPath().resolve("app").toFile()
+                resourceTarget = appRootTarget.toPath().resolve("Resources").toFile()
+
             } else {
                 throw new RuntimeException("Could not detect OS for packaging!")
             }
@@ -357,7 +362,7 @@ subprojects {
                     include('LICENSE.txt')
                 }
                 from(downloadManual.outputs.files.singleFile)
-                into(appRootTarget)
+                into(resourceTarget)
             }
 
 
