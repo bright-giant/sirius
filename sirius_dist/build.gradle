@@ -431,9 +431,52 @@ subprojects {
             templateBinding.forEach({ k, v -> script = script.replace("#$k#", v) })
             f.withWriter { it.write(script) }
             f.setExecutable(true, false)
+
+            //todo move to separate task
+
         }
     }
     distImage.shouldRunAfter downloadManual
+
+    task signDistImage(dependsOn: distImage, group: 'distribution') {
+        inputs.dir(distImage.outputDir)
+        doLast {
+            if (project.OS.isMacOsX()) {
+                def signID = System.getenv("MACOS_APP_IDENTITY_ID")
+                if (signID != null && !signID.isBlank()) {
+                    getLogger().lifecycle("Signing native libs dir")
+                    for (File f : distImage.getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles()) {
+                        getLogger().lifecycle("Signing native lib '$f'")
+                        project.exec {
+                            commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "${entitlementsFile.getAbsolutePath()}", "-f", "-v",
+                                         "${f.getAbsolutePath()}"])
+                        }
+                    }
+
+                    getLogger().lifecycle("Signing jars dir")
+                    for (File f : distImage.getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ file -> file.getName().endsWith(".jar") } as FileFilter)) {
+                        getLogger().lifecycle("Signing jar '$f'")
+                        project.exec {
+                            commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "${entitlementsFile.getAbsolutePath()}", "-f", "-v",
+                                         "${f.getAbsolutePath()}"])
+                        }
+                    }
+
+                    println "Signing .app dir"
+                    project.exec {
+                        commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "${entitlementsFile.getAbsolutePath()}", "-f", "-v",
+                                     "${distImage.getImageDir()}"])
+                    }
+                } else {
+                    println "Could not find ID for signing. APP image will not be signed!"
+                }
+            } else if (project.OS.isWindows()){
+                println "Signing not yet implemented for Windows"
+            }else if (project.OS.isLinux()){
+                println "Signing not yet implemented for Linux"
+            }
+        }
+    }
 
     task distImageZip(dependsOn: distImage, group: 'distribution') {
         doFirst {
@@ -449,6 +492,7 @@ subprojects {
             }
         }
     }
+    distImageZip.mustRunAfter(signDistImage)
 
     task distInstaller(type: AppInstaller, dependsOn: distImage, group: 'distribution') {
         distImg = distImage
@@ -459,16 +503,23 @@ subprojects {
         linuxMenuGroup = ['Applications', 'Science']
         debPackageMaintaner = 'sirius@uni-jena.de'
     }
+    distInstaller.mustRunAfter(signDistImage)
+
+
+//    task macNotarize(){
+//
+//    }
 
     task createChecksums(type: Checksum) {
-        mustRunAfter('distImageZip','distInstaller')
-        inputFiles.setFrom(fileTree(dir: "$buildDir/distributions", includes: ['*.zip','*.pkg','*.deb','*.msi']))
+        mustRunAfter('distImageZip', 'distInstaller')
+        inputFiles.setFrom(fileTree(dir: "$buildDir/distributions", includes: ['*.zip', '*.pkg', '*.deb', '*.msi']))
         outputDirectory.set(file("$buildDir/distributions"))
         checksumAlgorithm.set(Checksum.Algorithm.SHA256)
         appendFileNameToChecksum.set(true)
     }
 
     task distribution { group = 'distribution' }
+    distribution.dependsOn 'signDistImage'
     artifactoryPublish.dependsOn 'distribution'
 }
 
@@ -513,26 +564,26 @@ abstract class ExtractRuntime extends DefaultTask {
 
 abstract class AppImage extends DefaultTask {
 
-    File inputDir
-    File jpackagerBin
-    File outputDir
-    String imageName
-    String[] jvmArgs
-    String[] args
-    String version
-    String mainClass
-    String mainJarName
-    File runtimeImageDirectory
-    boolean winConsole
-    Map<String, File> launchers = [:]
+    public File inputDir
+    public File jpackagerBin
+    public File outputDir
+    public String imageName
+    public String[] jvmArgs
+    public String[] args
+    public String version
+    public String mainClass
+    public String mainJarName
+    public File runtimeImageDirectory
+    public boolean winConsole
+    public Map<String, File> launchers = [:]
 
-    File entitlementsFile
+    public File entitlementsFile
 
     /*--mac-package-name name string
     Name of the application as it appears in the Menu Bar.
     This can be different from the application name.
     This name must be less than 16 characters long and be suitable for displaying in the menu bar and the application Info window. Defaults to the application name.*/
-    String macPackageName = null
+    public String macPackageName = null
 
     AppImage() {
         imageName = project.name
@@ -556,35 +607,6 @@ abstract class AppImage extends DefaultTask {
             def c = buildCommand(p)
             println c
             commandLine(c)
-        }
-
-        def signID = System.getenv("MACOS_APP_IDENTITY_ID")
-        if (signID != null && !signID.isBlank()) {
-            getLogger().lifecycle("Signing native libs dir")
-            for (File f : getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles()) {
-                getLogger().lifecycle("Signing native lib '$f'")
-                project.exec {
-                    commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "${entitlementsFile.getAbsolutePath()}", "-f", "-v",
-                                 "${f.getAbsolutePath()}"])
-                }
-            }
-
-            getLogger().lifecycle("Signing jars dir")
-            for (File f : getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ file -> file.getName().endsWith(".jar") } as FileFilter)) {
-                getLogger().lifecycle("Signing jar '$f'")
-                project.exec {
-                    commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "${entitlementsFile.getAbsolutePath()}", "-f", "-v",
-                                 "${f.getAbsolutePath()}"])
-                }
-            }
-
-            println "Signing .app dir"
-            project.exec {
-                commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "${entitlementsFile.getAbsolutePath()}", "-f", "-v",
-                             "${getImageDir()}"])
-            }
-        } else {
-            println "Could not find ID for signing. APP image will not be signed!"
         }
     }
 
