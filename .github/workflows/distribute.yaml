@@ -214,7 +214,7 @@ jobs:
           APP_NAME: "sirius"
           APP_PATH_TARGET: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg"
           APP_PATH_SOURCE: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-osx64-headless.pkg"
-        run: /
+        run: |
           /usr/bin/productsign --timestamp --sign "$MACOS_IDENTITY_ID" "$APP_PATH_SOURCE" "$APP_PATH_TARGET"
           zsh ./.github/scripts/mac-create-identity.zsh
 
