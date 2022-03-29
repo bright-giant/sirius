@@ -306,7 +306,6 @@ subprojects {
         mainClass = mainClassName
         outputDir = buildDir.toPath().resolve('distributions').toFile()
         winConsole = true
-        entitlementsFile = getRootProject().getProjectDir().toPath().resolve("dist").resolve("macos.entitlements").toFile()
 
         String[] jArgs = [
                 '-Xms1G',
@@ -439,9 +438,11 @@ subprojects {
     distImage.shouldRunAfter downloadManual
 
     task signDistImage(dependsOn: distImage, group: 'distribution') {
+
         inputs.dir(distImage.outputDir)
         doLast {
             if (project.OS.isMacOsX()) {
+                def entitlementsFile = getRootProject().getProjectDir().toPath().resolve("dist").resolve("macos.entitlements").toFile()
                 def signID = System.getenv("MACOS_APP_IDENTITY_ID")
                 if (signID != null && !signID.isBlank()) {
                     getLogger().lifecycle("Signing native libs dir")
@@ -577,7 +578,6 @@ abstract class AppImage extends DefaultTask {
     public boolean winConsole
     public Map<String, File> launchers = [:]
 
-    public File entitlementsFile
 
     /*--mac-package-name name string
     Name of the application as it appears in the Menu Bar.
