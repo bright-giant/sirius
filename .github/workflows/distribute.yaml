@@ -232,15 +232,16 @@ jobs:
         uses: devbotsxyz/xcode-staple@v1
         with:
           product-path: "./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg"
+          verbose: true
 
       - name: Upload Distributions
         uses: actions/upload-artifact@v2
         with:
           retention-days: 1
           name: "sirius-${{ steps.sirius_version.outputs.value }}-${{ runner.os }}-x86-64_SIGNED"
-          path: ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg
-#            ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64.pkg
-#            ./sirius_dist/build/tmp/artifacts/sirius-$VERSION-macOS-x86-64-headless.pkg
+          path: ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg
+#            ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64.pkg
+#            ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg
   release:
 #    needs: [ distCLI, distGUI, distMulti, macosSign]
     needs: [ distCLI, macosSign]
