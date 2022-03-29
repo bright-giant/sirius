@@ -447,8 +447,6 @@ subprojects {
     task signDistImage(dependsOn: distImage, group: 'distribution') {
 
         inputs.dir(distImage.outputDir)
-        outputs.dir(distImage.outputDir)
-
         doLast {
             if (project.OS.isMacOsX()) {
 
@@ -533,13 +531,19 @@ subprojects {
     }
     distInstaller.mustRunAfter(signDistImage)
 
+    /*task signDistInstaller(dependsOn: distInstaller, group: 'distribution'){
+        inputs.dir(distInstaller.outputDir)
+        doLast {
+
+        }
+    }
 
     task macNotarize(dependsOn: signDistImage, group: 'distribution'){
         inputs.dir(distImage.outputDir)
         doLast {
 
         }
-    }
+    }*/
 
     task createChecksums(type: Checksum) {
         mustRunAfter('distImageZip', 'distInstaller')
