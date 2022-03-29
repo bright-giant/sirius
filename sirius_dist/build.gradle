@@ -461,6 +461,8 @@ subprojects {
 
                     getLogger().lifecycle("extract libs nested in jars")
                     def extractedLibs = getBuildDir().toPath().resolve("tmp").resolve("jarLibs")
+                    Files.createDirectories(extractedLibs)
+
                     for (def inJar : jarNestedLibs)
                         Files.copy(inJar, extractedLibs.resolve(inJar.getFileName().toString()))
 
