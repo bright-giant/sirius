@@ -16,14 +16,15 @@ xcrun altool --list-providers -u "$MACOS_APPLE_ID" -p "$MACOS_APPLE_ID_PW"
 
 # Upload pkg for verification.
 REQUEST_UUID=$(xcrun altool --notarize-app --primary-bundle-id "app.$APP_NAME-$VERSION" -u "$MACOS_APPLE_ID" -p "$MACOS_APPLE_ID_PW" --file "$APP_PATH_TARGET" | grep RequestUUID | awk '{print $3}')
+echo "RequestUUID: $REQUEST_UUID"
 # Wait for verification to complete.
 while xcrun altool --notarization-info "$REQUEST_UUID" -u "$MACOS_APPLE_ID" -p "$MACOS_APPLE_ID_PW" | grep "Status: in progress" > /dev/null; do
   echo "Verification in progress..."
   sleep 30
 done
-# Attach stamp to the pkg.
-xcrun stapler staple "$APP_PATH_TARGET"
-# Check APP and pkg.
-spctl -a -t install -vvv "$APP_PATH_TARGET"
-codesign -vvv --deep --strict "$APP_PATH_TARGET"
-codesign -dvv "$APP_PATH_TARGET"
+## Attach stamp to the pkg.
+#xcrun stapler staple "$APP_PATH_TARGET"
+## Check APP and pkg.
+#spctl -a -t install -vvv "$APP_PATH_TARGET"
+#codesign -vvv --deep --strict "$APP_PATH_TARGET"
+#codesign -dvv "$APP_PATH_TARGET"
