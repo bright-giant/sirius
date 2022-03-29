@@ -306,6 +306,7 @@ subprojects {
         mainClass = mainClassName
         outputDir = buildDir.toPath().resolve('distributions').toFile()
         winConsole = true
+        entitlementsFile = getRootProject().getProjectDir().toPath().resolve("dist").resolve("macos.entitlements").toFile()
 
         String[] jArgs = [
                 '-Xms1G',
@@ -525,6 +526,8 @@ abstract class AppImage extends DefaultTask {
     boolean winConsole
     Map<String, File> launchers = [:]
 
+    File entitlementsFile
+
     /*--mac-package-name name string
     Name of the application as it appears in the Menu Bar.
     This can be different from the application name.
@@ -556,21 +559,19 @@ abstract class AppImage extends DefaultTask {
         }
 
         def signID = System.getenv("MACOS_APP_IDENTITY_ID")
-        def entitlementsFile = getRootProject().getProjectDir().toPath().resolve("dist").resolve("macos.entitlements").toFile()
-
         if (signID != null && !signID.isBlank()) {
-            println "Signing native libs dir"
+            getLogger().lifecycle("Signing native libs dir")
             for (File f : getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles()) {
-                println("Signing native lib '$f'")
+                getLogger().lifecycle("Signing native lib '$f'")
                 project.exec {
                     commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "${entitlementsFile.getAbsolutePath()}", "-f", "-v",
                                  "${f.getAbsolutePath()}"])
                 }
             }
 
-            println "Signing jars dir"
+            getLogger().lifecycle("Signing jars dir")
             for (File f : getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ file -> file.getName().endsWith(".jar") } as FileFilter)) {
-                println("Signing jar '$f'")
+                getLogger().lifecycle("Signing jar '$f'")
                 project.exec {
                     commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "${entitlementsFile.getAbsolutePath()}", "-f", "-v",
                                  "${f.getAbsolutePath()}"])
