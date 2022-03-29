@@ -445,19 +445,40 @@ subprojects {
     task signDistImage(dependsOn: distImage, group: 'distribution') {
 
         inputs.dir(distImage.outputDir)
+
         doLast {
             if (project.OS.isMacOsX()) {
-                def entitlementsFile = getRootProject().getProjectDir().toPath().resolve("dist").resolve("macos.entitlements").toFile()
+
                 def signID = System.getenv("MACOS_APP_IDENTITY_ID")
                 if (signID != null && !signID.isBlank()) {
+                    def entitlementsFile = getRootProject().getProjectDir().toPath().resolve("dist").resolve("macos.entitlements").toFile()
+                    def additionalLibs = [new File(distImage.getImageDir(), "runtime/Contents/MacOS/libjli.dylib")]
+                    def jarNestedLibs = [
+                            new URI("jar:file:${distImage.getImageDir().toPath().resolve("Contents").resolve("app").resolve("jni-inchi-0.8.jar").toFile().getAbsolutePath()}!/META-INF/jniinchi/1.03_1/MAC-X86_64/JniInchi-1.03_1-MAC-X86_64")]
+
+                    getLogger().lifecycle("extract libs nested in jars")
+                    def extractedLibs = getBuildDir().toPath().resolve("tmp").resolve("jarLibs")
+                    for (URI f : jarNestedLibs) {
+                        def source = Paths.get(f);
+                        Files.copy(source, extractedLibs.resolve(source.getFileName()))
+                    }
+
+
                     getLogger().lifecycle("Signing native libs dir")
-                    for (File f : distImage.getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles()) {
+                    for (File f : distImage.getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles() + additionalLibs + extractedLibs.toFile().listFiles()) {
                         getLogger().lifecycle("Signing native lib '$f'")
                         project.exec {
                             commandLine(["codesign", "-s", "${signID}", "--options", "runtime", "--entitlements", "${entitlementsFile.getAbsolutePath()}", "-f", "-v",
                                          "${f.getAbsolutePath()}"])
                         }
                     }
+
+                    getLogger().lifecycle("Reinsert libs nested in jars")
+                    for (URI f : jarNestedLibs) {
+                        def target = Paths.get(f);
+                        Files.copy(extractedLibs.resolve(target.getFileName()), target)
+                    }
+
 
                     getLogger().lifecycle("Signing jars dir")
                     for (File f : distImage.getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ file -> file.getName().endsWith(".jar") } as FileFilter)) {
