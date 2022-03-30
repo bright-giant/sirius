@@ -25,15 +25,11 @@ task createGuiExe(type: Launch4jLibraryTask) {
 distImage {
     dependsOn getParent().tasks.getByName('extractRuntimeImageFX')
     mainClass = mainClassName
-    imageName = 'sirius-gui'
-    args = ['gui']
+    imageName = 'sirius'
     runtimeImageDirectory = getParent().tasks.getByName('extractRuntimeImageFX').outputs.files.singleFile
     mainJarName = getRootProject().getChildProjects().get('sirius_gui').tasks.getByName('jar').outputs.files.singleFile.getName()
     winConsole = false
-    macPackageName = 'SIRIUS'
-    if (!OS.isWindows()) { //additional windows launchers are handled by launch4j
-        launchers = ["sirius-gui": file("${rootDir}/scripts/${OS.isMacOsX() ? "sirius-gui.zsh" : "sirius-gui.sh"}")]
-    }
+    macPackageName = "SIRIUS"
 }
 
 distInstaller {
