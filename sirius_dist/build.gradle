@@ -531,19 +531,81 @@ subprojects {
     }
     distInstaller.mustRunAfter(signDistImage)
 
-    /*task signDistInstaller(dependsOn: distInstaller, group: 'distribution'){
-        inputs.dir(distInstaller.outputDir)
-        doLast {
-
-        }
-    }
-
-    task macNotarize(dependsOn: signDistImage, group: 'distribution'){
+    task signDistInstaller(dependsOn: distInstaller, group: 'distribution') {
         inputs.dir(distImage.outputDir)
         doLast {
-
+            if (project.OS.isMacOsX()) {
+                def source = java.nio.Path.of(distImage.getImageDir().absolutePath.replace('.app', installerAppendix))
+                def target = java.nio.Path.of(distImage.getImageDir().absolutePath.replace('.app', "-SIGNED") + installerAppendix)
+                getLogger().lifecycle("Signing INSTALLER '$source'")
+                project.exec {
+                    commandLine(["/usr/bin/productsign", "--timestamp", "--sign", "${System.getenv("MACOS_IDENTITY_ID")}",
+                                 "$source", "$target"
+                    ])
+                }
+            }
+            getLogger().lifecycle("Signing source INSTALLER with signed installer")
+            if (Files.exists(target))
+                Files.move(target, source, StandardCopyOption.REPLACE_EXISTING)
         }
-    }*/
+
+    }
+
+    task macNotarize(dependsOn: signDistInstaller, group: 'distribution') {
+        inputs.dir(distImage.outputDir)
+        doLast {
+            if (project.OS.isMacOsX()) {
+                def pkg = java.nio.Path.of(distImage.getImageDir().absolutePath.replace('.app', installerAppendix))
+                getLogger().lifecycle("Showing available providers")
+                project.exec {
+                    commandLine(["xcrun", "altool", "--list-providers",
+                                 "-u", "${System.getenv("MACOS_APPLE_ID")}",
+                                 "-p", "${System.getenv("MACOS_APPLE_ID_PW")}"])
+                }
+
+                getLogger().lifecycle("Submit for  notarization")
+                String uuid = null
+                new ByteArrayOutputStream().withStream { os ->
+                    project.exec {
+                        commandLine(["xcrun", "altool", "--notarize-app", "--primary-bundle-id", "app.${distImage.imageName}-$version",
+                                     "-u", "${System.getenv("MACOS_APPLE_ID")}",
+                                     "-p", "${System.getenv("MACOS_APPLE_ID_PW")}",
+                                     "--file", "$pkg", "|", "grep", "RequestUUID", "|", "awk", "'{print \$3}'"])
+                        standardOutput = os
+                    }
+                    uuid = os.toString
+                }
+
+                Map<String, String> states = ["Status": "in progress"]
+                getLogger().lifecycle("Waiting  for  notarization")
+                while ("in progress" == states.get("Status")) {
+                    new ByteArrayOutputStream().withStream { os ->
+                        project.exec {
+                            commandLine(["crun", "altool", "--notarization-info", "$uuid", "-u", "${System.getenv("MACOS_APPLE_ID")}", "-p", "${System.getenv("MACOS_APPLE_ID_PW")}"])
+                            standardOutput = os
+                        }
+                        states = (os.toString().split(System.lineSeparator()) as List).stream().map({s -> s.split("\\s:\\s")}).collect(Collectors.toMap({k -> k[0]}, {v -> v[1]}))
+                        println(states)
+                    }
+                }
+
+                if (states.get("Status Code") == "0" && states.get("Status") == "success") {
+                    new ByteArrayOutputStream().withStream { os ->
+                        project.exec {
+                            commandLine(["xcrun", "stapler", "staple", "${pkg}"])
+                            standardOutput = os
+                        }.assertNormalExitValue()
+                        getLogger().lifecycle(os.toString())
+                    }
+                } else {
+                    getLogger().lifecycle("Status Code: " + states.get("Status Code"))
+                    getLogger().lifecycle("Status: " + states.get("Status"))
+                    getLogger().lifecycle("Status Message: " + states.get("Status Message"))
+                    throw new GradleException("Error during notarization")
+                }
+            }
+        }
+    }
 
     task createChecksums(type: Checksum) {
         mustRunAfter('distImageZip', 'distInstaller')
@@ -555,6 +617,8 @@ subprojects {
 
     task distribution { group = 'distribution' }
     distribution.dependsOn 'signDistImage'
+    distribution.dependsOn 'signDistInstaller'
+    distribution.dependsOn 'macNotarize'
     artifactoryPublish.dependsOn 'distribution'
 }
 
