@@ -435,9 +435,6 @@ subprojects {
             templateBinding.forEach({ k, v -> script = script.replace("#$k#", v) })
             f.withWriter { it.write(script) }
             f.setExecutable(true, false)
-
-            //todo move to separate task
-
         }
     }
     distImage.shouldRunAfter downloadManual
@@ -460,9 +457,10 @@ subprojects {
                     getLogger().lifecycle("extract libs nested in jars")
                     def extractedLibs = getBuildDir().toPath().resolve("tmp").resolve("jarLibs")
                     Files.createDirectories(extractedLibs)
-
-                    for (def inJar : jarNestedLibs)
-                        Files.copy(inJar, extractedLibs.resolve(inJar.getFileName().toString()))
+                    for (def inJar : jarNestedLibs){
+                        getLogger().lifecycle("Extracting from jar '${inJar}'")
+                        Files.copy(inJar, extractedLibs.resolve(inJar.getFileName().toString()), StandardCopyOption.REPLACE_EXISTING)
+                    }
 
                     getLogger().lifecycle("Signing native libs dir")
                     for (File f : distImage.getImageDir().toPath().resolve("Contents").resolve("native").toFile().listFiles() + additionalLibs + extractedLibs.toFile().listFiles()) {
@@ -474,8 +472,10 @@ subprojects {
                     }
 
                     getLogger().lifecycle("Reinsert libs nested in jars")
-                    for (def inJar : jarNestedLibs)
+                    for (def inJar : jarNestedLibs){
+                        getLogger().lifecycle("Reinserting into jar '${inJar}'")
                         Files.copy(extractedLibs.resolve(inJar.getFileName().toString()), inJar, StandardCopyOption.REPLACE_EXISTING)
+                    }
 
                     getLogger().lifecycle("Signing jars dir")
                     for (File f : distImage.getImageDir().toPath().resolve("Contents").resolve("app").toFile().listFiles({ file -> file.getName().endsWith(".jar") } as FileFilter)) {
