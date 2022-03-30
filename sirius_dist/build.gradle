@@ -604,7 +604,7 @@ subprojects {
                         }
 
                         states = (os.toString().split(System.lineSeparator()) as List).stream().map({ s -> s.split("\\s*[:]\\s*") as List })
-                                .collect(Collectors.toMap({ k -> k.get(0).strip() }, { v -> v.size() > 1 ? String.join(v.subList(1, v.size()), ':').strip() : "N/A" }))
+                                .collect(Collectors.toMap({ k -> k.get(0).strip() }, { v -> v.size() > 1 ? String.join(':', v.subList(1, v.size())).strip() : "N/A" }))
                         println(states)
                         println("Waiting 30s before retry...")
                     }
