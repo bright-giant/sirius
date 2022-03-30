@@ -602,8 +602,8 @@ subprojects {
                             commandLine(c)
                             standardOutput = os
                         }
-                        states = (os.toString().split(System.lineSeparator()) as List).stream().map({s -> s.split("\\s*[:]\\s*") as List})
-                                .collect(Collectors.toMap({k -> k.get(0).strip()}, {v -> v.size() > 1 ? v.get(1).strip() : "N/A"}))
+                        states = (os.toString().split(System.lineSeparator()) as List).stream().map({ s -> s.split("\\s*[:]\\s*") as List })
+                                .collect(Collectors.toMap({ k -> k.get(0).strip() }, { v -> v.size() > 1 ? String.join(v.sublist(1, v.size()), ':').strip() : "N/A" }))
                         println(states)
                         println("Waiting 30s before retry...")
                     }
