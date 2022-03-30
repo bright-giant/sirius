@@ -551,7 +551,7 @@ subprojects {
             }else if (project.OS.isLinux()){
                 println "Signing not yet implemented for Linux"
             }
-            getLogger().lifecycle("Signing source INSTALLER with signed installer")
+            getLogger().lifecycle("Replacing source INSTALLER with signed installer")
             if (target != null && source != null && Files.exists(target))
                 Files.move(target, source, StandardCopyOption.REPLACE_EXISTING)
         }
@@ -588,7 +588,7 @@ subprojects {
                 while ("in progress" == states.get("Status")) {
                     new ByteArrayOutputStream().withStream { os ->
                         project.exec {
-                            commandLine(["crun", "altool", "--notarization-info", "$uuid", "-u", "${System.getenv("MACOS_APPLE_ID")}", "-p", "${System.getenv("MACOS_APPLE_ID_PW")}"])
+                            commandLine(["xcrun", "altool", "--notarization-info", "$uuid", "-u", "${System.getenv("MACOS_APPLE_ID")}", "-p", "${System.getenv("MACOS_APPLE_ID_PW")}"])
                             standardOutput = os
                         }
                         states = (os.toString().split(System.lineSeparator()) as List).stream().map({s -> s.split("\\s:\\s")}).collect(Collectors.toMap({k -> k[0]}, {v -> v[1]}))
