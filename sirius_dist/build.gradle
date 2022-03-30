@@ -4,6 +4,7 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.stream.Collectors
 
@@ -535,8 +536,8 @@ subprojects {
         inputs.dir(distImage.outputDir)
         doLast {
             if (project.OS.isMacOsX()) {
-                def source = java.nio.Path.of(distImage.getImageDir().absolutePath.replace('.app', installerAppendix))
-                def target = java.nio.Path.of(distImage.getImageDir().absolutePath.replace('.app', "-SIGNED") + installerAppendix)
+                def source = Path.of(distImage.getImageDir().absolutePath.replace('.app', installerAppendix))
+                def target = Path.of(distImage.getImageDir().absolutePath.replace('.app', "-SIGNED") + installerAppendix)
                 getLogger().lifecycle("Signing INSTALLER '$source'")
                 project.exec {
                     commandLine(["/usr/bin/productsign", "--timestamp", "--sign", "${System.getenv("MACOS_IDENTITY_ID")}",
@@ -555,7 +556,7 @@ subprojects {
         inputs.dir(distImage.outputDir)
         doLast {
             if (project.OS.isMacOsX()) {
-                def pkg = java.nio.Path.of(distImage.getImageDir().absolutePath.replace('.app', installerAppendix))
+                def pkg = Path.of(distImage.getImageDir().absolutePath.replace('.app', installerAppendix))
                 getLogger().lifecycle("Showing available providers")
                 project.exec {
                     commandLine(["xcrun", "altool", "--list-providers",
