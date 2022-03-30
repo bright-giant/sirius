@@ -1,16 +1,13 @@
 import org.gradle.crypto.checksum.Checksum
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.Path
-import java.nio.file.StandardCopyOption
+import java.nio.file.*
 import java.util.stream.Collectors
 
 plugins {
     id 'edu.sc.seis.launch4j' version '2.5.1'
     id 'org.gradle.crypto.checksum' version '1.4.0'
+    id 'net.jsign'
 }
 
 
@@ -546,11 +543,22 @@ subprojects {
                                  "$source", "$target"
                     ])
                 }
-            } else if (project.OS.isWindows()){
+            } else if (project.OS.isWindows()) {
+               /* jsign(
+                        file: 'application.exe',
+                        name: 'My Application',
+                        url: 'http://www.example.com',
+                        keystore: 'https://cs-try.ssl.com', //todo remove, this is a testenv
+                        alias: 'test',
+                        storetype: 'ESIGNER',
+                        storepass: "${System.getenv("SSLCOM_USERNAME")}|${System.getenv("SSLCOM_PW")}",
+                        tsaurl: 'http://timestamp.sectigo.com'
+                )*/
                 println "Signing not yet implemented for Windows"
-            }else if (project.OS.isLinux()){
+            } else if (project.OS.isLinux()) {
                 println "Signing not yet implemented for Linux"
             }
+
             getLogger().lifecycle("Replacing source INSTALLER with signed installer")
             if (target != null && source != null && Files.exists(target))
                 Files.move(target, source, StandardCopyOption.REPLACE_EXISTING)

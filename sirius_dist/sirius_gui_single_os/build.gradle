@@ -42,9 +42,8 @@ distInstaller {
 
 distribution.dependsOn(createChecksums)
 distribution.dependsOn 'distImageZip'
-if (!OS.isLinux()) {
+if (!OS.isLinux())
     distribution.dependsOn 'distInstaller'
-}
 
 publishing {
     publications {
