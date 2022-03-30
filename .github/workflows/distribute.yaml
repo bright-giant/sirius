@@ -32,11 +32,14 @@ jobs:
       - name: Import Apple APP Code-signing ID and p12
         uses: apple-actions/import-codesign-certs@v1
         with:
+          keychain-password: ${{ secrets.MACOS_APP_APPLE_ID_PW }}
           p12-file-base64: ${{ secrets.MACOS_APP_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_APP_CERTIFICATE_PWD }}
       - name: Import Apple Installer Code-signing ID and p12
         uses: apple-actions/import-codesign-certs@v1
         with:
+          create-keychain: false
+          keychain-password: ${{ secrets.MACOS_APP_APPLE_ID_PW }}
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
       - name: Check Identities
