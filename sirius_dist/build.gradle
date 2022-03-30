@@ -544,15 +544,15 @@ subprojects {
                     ])
                 }
             } else if (project.OS.isWindows()) {
-               /* jsign(
-                        file: 'application.exe',
-                        name: 'My Application',
-                        url: 'http://www.example.com',
+                /*jsign(
+                        file: distImage.getImageDir().absolutePath + installerAppendix,
+//                        name: 'SIRIUS',
                         keystore: 'https://cs-try.ssl.com', //todo remove, this is a testenv
-                        alias: 'test',
+                        alias: 'sirius-test',
                         storetype: 'ESIGNER',
                         storepass: "${System.getenv("SSLCOM_USERNAME")}|${System.getenv("SSLCOM_PW")}",
-                        tsaurl: 'http://timestamp.sectigo.com'
+//                        keypass: ""
+//                        tsaurl: 'http://ts.ssl.com/'
                 )*/
                 println "Signing not yet implemented for Windows"
             } else if (project.OS.isLinux()) {
