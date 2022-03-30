@@ -581,14 +581,17 @@ subprojects {
                         standardOutput = os
                     }
                     uuid = os.toString()
+                    println("Submitted Notarization Job with RequestUUID: $uuid")
                 }
 
                 Map<String, String> states = ["Status": "in progress"]
                 getLogger().lifecycle("Waiting  for  notarization")
                 while ("in progress" == states.get("Status")) {
                     new ByteArrayOutputStream().withStream { os ->
+                        def c = ["xcrun", "altool", "--notarization-info", "${uuid}", "-u", "${System.getenv("MACOS_APPLE_ID")}", "-p", "${System.getenv("MACOS_APPLE_ID_PW")}"]
+                        println(Arrays.toString(c))
                         project.exec {
-                            commandLine(["xcrun", "altool", "--notarization-info", "$uuid", "-u", "${System.getenv("MACOS_APPLE_ID")}", "-p", "${System.getenv("MACOS_APPLE_ID_PW")}"])
+                            commandLine(c)
                             standardOutput = os
                         }
                         states = (os.toString().split(System.lineSeparator()) as List).stream().map({s -> s.split("\\s:\\s")}).collect(Collectors.toMap({k -> k[0]}, {v -> v[1]}))
