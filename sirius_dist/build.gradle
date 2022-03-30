@@ -580,7 +580,7 @@ subprojects {
                                      "--file", "$pkg", "|", "grep", "RequestUUID", "|", "awk", "'{print \$3}'"])
                         standardOutput = os
                     }
-                    uuid = os.toString
+                    uuid = os.toString()
                 }
 
                 Map<String, String> states = ["Status": "in progress"]
