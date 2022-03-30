@@ -535,18 +535,24 @@ subprojects {
     task signDistInstaller(dependsOn: distInstaller, group: 'distribution') {
         inputs.dir(distImage.outputDir)
         doLast {
+            def source
+            def target
             if (project.OS.isMacOsX()) {
-                def source = Path.of(distImage.getImageDir().absolutePath.replace('.app', installerAppendix))
-                def target = Path.of(distImage.getImageDir().absolutePath.replace('.app', "-SIGNED") + installerAppendix)
+                source = Path.of(distImage.getImageDir().absolutePath.replace('.app', installerAppendix))
+                target = Path.of(distImage.getImageDir().absolutePath.replace('.app', "-SIGNED") + installerAppendix)
                 getLogger().lifecycle("Signing INSTALLER '$source'")
                 project.exec {
                     commandLine(["/usr/bin/productsign", "--timestamp", "--sign", "${System.getenv("MACOS_IDENTITY_ID")}",
                                  "$source", "$target"
                     ])
                 }
+            } else if (project.OS.isWindows()){
+                println "Signing not yet implemented for Windows"
+            }else if (project.OS.isLinux()){
+                println "Signing not yet implemented for Linux"
             }
             getLogger().lifecycle("Signing source INSTALLER with signed installer")
-            if (Files.exists(target))
+            if (target != null && source != null && Files.exists(target))
                 Files.move(target, source, StandardCopyOption.REPLACE_EXISTING)
         }
 
@@ -609,7 +615,7 @@ subprojects {
     }
 
     task createChecksums(type: Checksum) {
-        mustRunAfter('distImageZip', 'distInstaller')
+        mustRunAfter('distImageZip', 'distInstaller', 'macNotarize', 'signDistImage', 'signDistInstaller')
         inputFiles.setFrom(fileTree(dir: "$buildDir/distributions", includes: ['*.zip', '*.pkg', '*.deb', '*.msi']))
         outputDirectory.set(file("$buildDir/distributions"))
         checksumAlgorithm.set(Checksum.Algorithm.SHA256)
