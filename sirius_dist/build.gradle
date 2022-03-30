@@ -577,10 +577,10 @@ subprojects {
                         commandLine(["xcrun", "altool", "--notarize-app", "--primary-bundle-id", "app.${distImage.imageName}-$version",
                                      "-u", "${System.getenv("MACOS_APPLE_ID")}",
                                      "-p", "${System.getenv("MACOS_APPLE_ID_PW")}",
-                                     "--file", "$pkg", "|", "grep", "RequestUUID", "|", "awk", "'{print \$3}'"])
+                                     "--file", "$pkg"])
                         standardOutput = os
                     }
-                    uuid = os.toString()
+                    uuid = (os.toString().split(System.lineSeparator()) as List).stream().filter({ s -> s.contains("RequestUUID = ") }).findFirst()map({ s -> s.split("RequestUUID = ")[1].strip() }).orElseThrow()
                     println("Submitted Notarization Job with RequestUUID: $uuid")
                 }
 
