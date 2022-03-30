@@ -454,7 +454,7 @@ subprojects {
                                     .getPath("META-INF/jniinchi/1.03_1/MAC-X86_64/JniInchi-1.03_1-MAC-X86_64")
                     ]
 
-                    getLogger().lifecycle("extract libs nested in jars")
+                    getLogger().lifecycle("extract libs nested in the following jars ${Arrays.toString(jarNestedLibs)}")
                     def extractedLibs = getBuildDir().toPath().resolve("tmp").resolve("jarLibs")
                     Files.createDirectories(extractedLibs)
                     for (def inJar : jarNestedLibs){
@@ -475,6 +475,7 @@ subprojects {
                     for (def inJar : jarNestedLibs){
                         getLogger().lifecycle("Reinserting into jar '${inJar}'")
                         Files.copy(extractedLibs.resolve(inJar.getFileName().toString()), inJar, StandardCopyOption.REPLACE_EXISTING)
+                        inJar.fileSystem.close()
                     }
 
                     getLogger().lifecycle("Signing jars dir")
@@ -638,9 +639,6 @@ subprojects {
     }
 
     task distribution { group = 'distribution' }
-    distribution.dependsOn 'signDistImage'
-    distribution.dependsOn 'signDistInstaller'
-    distribution.dependsOn 'macNotarize'
     artifactoryPublish.dependsOn 'distribution'
 }
 
