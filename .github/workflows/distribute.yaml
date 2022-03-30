@@ -258,7 +258,7 @@ jobs:
 #            ./sirius_dist/build/tmp/artifacts/sirius-${{ steps.sirius_version.outputs.value }}-macOS-x86-64-headless.pkg
   release:
 #    needs: [ distCLI, distGUI, distMulti, macosSign]
-    needs: [ distCLI, macosSign]
+    needs: [ distCLI ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
