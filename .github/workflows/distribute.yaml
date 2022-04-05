@@ -53,11 +53,10 @@ jobs:
 
       - if: ${{ matrix.os == 'windows-latest' ||  matrix.os == 'ubuntu-latest'}}
         name: Load generic installer codesign cert
-        id: gereric-codesign-cert-p12
+        id: generic_codesign_cert
         uses: timheuer/base64-to-file@v1.1
         with:
           fileName: 'generic_installer_cert.p12'
-          fileDir: './'
           encodedString: ${{ secrets.GENERIC_INSTALLER_CERTIFICATE }}
 
 
@@ -68,10 +67,10 @@ jobs:
           MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
           MACOS_APPLE_ID: ${{ secrets.MACOS_APPLE_ID }}
           MACOS_APPLE_ID_PW: ${{ secrets.MACOS_APPLE_ID_PW }}
-          WIN_INSTALLER_CERTIFICATE_FILE: ${{ steps.gereric-codesign-cert-p12.outputs.filePath }}
+          WIN_INSTALLER_CERTIFICATE_FILE: ${{ steps.generic_codesign_cert.outputs.filePath }}
           WIN_INSTALLER_CERTIFICATE_PW: ${{ secrets.GENERIC_INSTALLER_CERTIFICATE_PW }}
           WIN_INSTALLER_CERTIFICATE_TIMESTAMP_URL: ${{ secrets.GENERIC_INSTALLER_CERTIFICATE_TIMESTAMP_URL }}
-#          LINUX_INSTALLER_CERTIFICATE_FILE: ${{ steps.gereric-codesign-cert-p12.outputs.filePath }}
+#          LINUX_INSTALLER_CERTIFICATE_FILE: ${{ steps.generic_codesign_cert.outputs.filePath }}
         with:
           gradle-version: 6.9
           build-root-directory: sirius_dist/sirius_cli_single_os
@@ -140,8 +139,7 @@ jobs:
         id: gereric-codesign-cert-p12
         uses: timheuer/base64-to-file@v1.1
         with:
-          fileName: 'generic_installer_cert.p12'
-          fileDir: './'
+          fileName: 'generic_codesign_cert'
           encodedString: ${{ secrets.GENERIC_INSTALLER_CERTIFICATE }}
 
       - name: Gradle Build
@@ -151,7 +149,7 @@ jobs:
           MACOS_IDENTITY_ID: ${{ secrets.MACOS_IDENTITY_ID }}
           MACOS_APPLE_ID: ${{ secrets.MACOS_APPLE_ID }}
           MACOS_APPLE_ID_PW: ${{ secrets.MACOS_APPLE_ID_PW }}
-          WIN_INSTALLER_CERTIFICATE_FILE: ${{ steps.gereric-codesign-cert-p12.outputs.filePath }}
+          WIN_INSTALLER_CERTIFICATE_FILE: ${{ steps.generic_codesign_cert.outputs.filePath }}
           WIN_INSTALLER_CERTIFICATE_PW: ${{ secrets.GENERIC_INSTALLER_CERTIFICATE_PW }}
           WIN_INSTALLER_CERTIFICATE_TIMESTAMP_URL: ${{ secrets.GENERIC_INSTALLER_CERTIFICATE_TIMESTAMP_URL }}
         with:

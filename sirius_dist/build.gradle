@@ -554,6 +554,7 @@ subprojects {
             } else if (project.OS.isWindows()) {
                 def input = distImage.getImageDir().absolutePath + installerAppendix
                 def certFile = System.getenv('WIN_INSTALLER_CERTIFICATE_FILE')
+                getLogger().lifecycle("Cert File location to use: '$certFile'")
                 if (certFile != null && !certFile.isBlank() && file(certFile).exists()) {
                     getLogger().lifecycle("Signing MSI installer using signtool.exe '$input'")
                     def c = ["signtool.exe", "sign", "/debug", "/f", "${certFile}",
