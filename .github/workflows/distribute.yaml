@@ -136,10 +136,10 @@ jobs:
 
       - if: ${{ matrix.os == 'windows-latest' ||  matrix.os == 'ubuntu-latest'}}
         name: Load generic installer codesign cert
-        id: gereric-codesign-cert-p12
+        id: generic_codesign_cert
         uses: timheuer/base64-to-file@v1.1
         with:
-          fileName: 'generic_codesign_cert'
+          fileName: 'generic_installer_cert.p12'
           encodedString: ${{ secrets.GENERIC_INSTALLER_CERTIFICATE }}
 
       - name: Gradle Build

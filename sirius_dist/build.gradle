@@ -556,6 +556,11 @@ subprojects {
                 def certFile = System.getenv('WIN_INSTALLER_CERTIFICATE_FILE')
                 getLogger().lifecycle("Cert File location to use: '$certFile'")
                 if (certFile != null && !certFile.isBlank() && file(certFile).exists()) {
+                    getLogger().lifecycle("Testing  signtool.exe")
+                    project.exec {
+                        commandLine(["signtool.exe", "/h"])
+                        standardOutput = System.out
+                    }
                     getLogger().lifecycle("Signing MSI installer using signtool.exe '$input'")
                     def c = ["signtool.exe", "sign", "/debug", "/f", "${certFile}",
                              "/d", "Installer for the SIRIUS MS/MS analysis Software",
