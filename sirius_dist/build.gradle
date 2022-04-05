@@ -556,13 +556,21 @@ subprojects {
                 def certFile = System.getenv('WIN_INSTALLER_CERTIFICATE_FILE')
                 getLogger().lifecycle("Cert File location to use: '$certFile'")
                 if (certFile != null && !certFile.isBlank() && file(certFile).exists()) {
-                    getLogger().lifecycle("Testing  signtool.exe")
+                    def searchPaths = [Path.of("${System.getenv("SystemDrive")}\\").resolve("Program Files (x86)").resolve("Windows Kits"), Path.of("${System.getenv("SystemDrive")}\\").resolve("Program Files").resolve("Windows Kits")]
+                    getLogger().lifecycle("Searching recursively for signtool.exe in ${searchPaths}")
+                    def signtoolExe = searchPaths.stream().filter({p -> Files.exists(p)}).flatMap({ p -> Files.walk(p) })
+                            .filter({ p -> p.getFileName().toString().equalsIgnoreCase('signtool.exe') })
+                            .findAny().orElseThrow({new FileNotFoundException("Could not find signtool.exe!")})
+                            .toAbsolutePath().toString()
+
+                    getLogger().lifecycle("Testing  signtool.exe found in '$signtoolExe'")
                     project.exec {
-                        commandLine(["signtool.exe", "/h"])
+                        commandLine(["$signtoolExe", "/h"])
                         standardOutput = System.out
                     }
+
                     getLogger().lifecycle("Signing MSI installer using signtool.exe '$input'")
-                    def c = ["signtool.exe", "sign", "/debug", "/f", "${certFile}",
+                    def c = ["$signtoolExe", "sign", "/debug", "/f", "${certFile}",
                              "/d", "Installer for the SIRIUS MS/MS analysis Software",
                              "/du", "https://bright-giant.com",
                              "/p", "${System.getenv('WIN_INSTALLER_CERTIFICATE_PW')}", "/v", "/fd", "SHA256",
