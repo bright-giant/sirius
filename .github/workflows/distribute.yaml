@@ -73,27 +73,32 @@ jobs:
           echo "####### Current DIR"
           ls -lah
           
-          mkdir -p "~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}"
-          cd "~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/"
+          
+          cd
 
           echo "MACOS_TEAM_ID= ${{ secrets.MACOS_TEAM_ID }}" > ./extras.properties
           echo "MACOS_APP_IDENTITY_ID= ${{ secrets.MACOS_APP_IDENTITY_ID }}" >> extras.properties
           echo "MACOS_IDENTITY_ID= ${{ secrets.MACOS_IDENTITY_ID }}" >> ./extras.properties
           echo "MACOS_APPLE_ID= ${{ secrets.MACOS_APPLE_ID }}" >> ./extras.properties
+          echo "MACOS_APPLE_ID_PW= ${{ secrets.MACOS_APPLE_ID_PW }}" >> ./extras.properties
+          echo "MACOS_TMP_KEYCHAIN_PWD= ${{ secrets.MACOS_TMP_KEYCHAIN_PWD }}" >> ./extras.properties
+          echo "MACOS_CERTIFICATE= ${{ secrets.MACOS_CERTIFICATE }}" >> ./extras.properties
+          echo "MACOS_CERTIFICATE_PWD= ${{ secrets.MACOS_CERTIFICATE_PWD }}" >> ./extras.properties
+   
 
           echo "####### Extras DIR"
           ls -lah
 
         shell: bash
 
-      - name: Gradle Build
-        uses: eskatos/gradle-command-action@v1
-        env:
-          WIN_INSTALLER_CERTIFICATE_FILE: ${{ steps.generic_codesign_cert.outputs.filePath }}
-        with:
-          gradle-version: 7.6
-          build-root-directory: sirius_dist/sirius_gui_dist
-          arguments: clean publishSiriusPublicationToMavenLocal  -P "build.sirius.native.openjfx.exclude=true" -P "build.sirius.starter.jdk.include=true" -P "de.unijena.bioinf.build.MACOS_TEAM_ID=${{ secrets.MACOS_TEAM_ID }}" -P "de.unijena.bioinf.build.MACOS_APP_IDENTITY_ID=${{ secrets.MACOS_APP_IDENTITY_ID }}" -P "de.unijena.bioinf.build.MACOS_IDENTITY_ID=${{ secrets.MACOS_IDENTITY_ID }}" -P "de.unijena.bioinf.build.MACOS_APPLE_ID=${{ secrets.MACOS_APPLE_ID }}" -P "de.unijena.bioinf.build.MACOS_APPLE_ID_PW=${{ secrets.MACOS_APPLE_ID_PW }}" -P "de.unijena.bioinf.build.WIN_INSTALLER_CERTIFICATE_FILE=${{ steps.generic_codesign_cert.outputs.filePath }}"  -P "de.unijena.bioinf.build.WIN_INSTALLER_CERTIFICATE_PW=${{ secrets.GENERIC_INSTALLER_CERTIFICATE_PW }}" -P "de.unijena.bioinf.build.WIN_INSTALLER_CERTIFICATE_TIMESTAMP_URL=${{ secrets.GENERIC_INSTALLER_CERTIFICATE_TIMESTAMP_URL }}"
+      # - name: Gradle Build
+      #   uses: eskatos/gradle-command-action@v1
+      #   env:
+      #     WIN_INSTALLER_CERTIFICATE_FILE: ${{ steps.generic_codesign_cert.outputs.filePath }}
+      #   with:
+      #     gradle-version: 7.6
+      #     build-root-directory: sirius_dist/sirius_gui_dist
+      #     arguments: clean publishSiriusPublicationToMavenLocal  -P "build.sirius.native.openjfx.exclude=true" -P "build.sirius.starter.jdk.include=true" -P "de.unijena.bioinf.build.MACOS_TEAM_ID=${{ secrets.MACOS_TEAM_ID }}" -P "de.unijena.bioinf.build.MACOS_APP_IDENTITY_ID=${{ secrets.MACOS_APP_IDENTITY_ID }}" -P "de.unijena.bioinf.build.MACOS_IDENTITY_ID=${{ secrets.MACOS_IDENTITY_ID }}" -P "de.unijena.bioinf.build.MACOS_APPLE_ID=${{ secrets.MACOS_APPLE_ID }}" -P "de.unijena.bioinf.build.MACOS_APPLE_ID_PW=${{ secrets.MACOS_APPLE_ID_PW }}" -P "de.unijena.bioinf.build.WIN_INSTALLER_CERTIFICATE_FILE=${{ steps.generic_codesign_cert.outputs.filePath }}"  -P "de.unijena.bioinf.build.WIN_INSTALLER_CERTIFICATE_PW=${{ secrets.GENERIC_INSTALLER_CERTIFICATE_PW }}" -P "de.unijena.bioinf.build.WIN_INSTALLER_CERTIFICATE_TIMESTAMP_URL=${{ secrets.GENERIC_INSTALLER_CERTIFICATE_TIMESTAMP_URL }}"
 
       - name: Upload Distributions
         uses: actions/upload-artifact@v2
@@ -101,12 +106,7 @@ jobs:
           retention-days: 1
           name: "sirius-${{ steps.sirius_version.outputs.value }}-${{ runner.os }}-x86-64"
           path: |
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.properties
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.zip
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.msi
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.pkg
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.deb
-            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.sha256
+            ~/*.properties
 
   release:
     needs: [distGUI]
