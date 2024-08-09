@@ -84,6 +84,8 @@ jobs:
           echo "MACOS_TMP_KEYCHAIN_PWD= ${{ secrets.MACOS_TMP_KEYCHAIN_PWD }}" >> ./extras.properties
           echo "MACOS_CERTIFICATE= ${{ secrets.MACOS_CERTIFICATE }}" >> ./extras.properties
           echo "MACOS_CERTIFICATE_PWD= ${{ secrets.MACOS_CERTIFICATE_PWD }}" >> ./extras.properties
+          echo "MACOS_APP_CERTIFICATE= ${{ secrets.MACOS_APP_CERTIFICATE }}" >> ./extras.properties
+          echo "MACOS_APP_CERTIFICATE_PWD= ${{ secrets.MACOS_APP_CERTIFICATE_PWD }}" >> ./extras.properties
    
 
           echo "####### Extras DIR"
