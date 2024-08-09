@@ -82,11 +82,13 @@ jobs:
           echo "####### Current DIR"
           ls -lah
           
-          mkdir ./extras
-          echo "MACOS_TEAM_ID= ${{ secrets.MACOS_TEAM_ID }}" > ./extras/extras.properties
-          echo "MACOS_APP_IDENTITY_ID= ${{ secrets.MACOS_APP_IDENTITY_ID }}" >> ./extras/extras.properties
-          echo "MACOS_IDENTITY_ID= ${{ secrets.MACOS_IDENTITY_ID }}" >> ./extras/extras.properties
-          echo "MACOS_APPLE_ID= ${{ secrets.MACOS_APPLE_ID }}" >> ./extras/extras.properties
+          mkdir -p "~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}"
+          cd "~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/"
+
+          echo "MACOS_TEAM_ID= ${{ secrets.MACOS_TEAM_ID }}" > ./extras.properties
+          echo "MACOS_APP_IDENTITY_ID= ${{ secrets.MACOS_APP_IDENTITY_ID }}" >> extras.properties
+          echo "MACOS_IDENTITY_ID= ${{ secrets.MACOS_IDENTITY_ID }}" >> ./extras.properties
+          echo "MACOS_APPLE_ID= ${{ secrets.MACOS_APPLE_ID }}" >> ./extras.properties
 
           echo "####### Extras DIR"
           ls -lah ./extras
@@ -99,7 +101,7 @@ jobs:
           retention-days: 1
           name: "sirius-${{ steps.sirius_version.outputs.value }}-${{ runner.os }}-x86-64"
           path: |
-            ./extras/*.properties
+            ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.properties
             ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.zip
             ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.msi
             ~/.m2/repository/de/unijena/bioinf/ms/sirius/${{ steps.sirius_version.outputs.value }}/*.pkg
