@@ -4,6 +4,7 @@ on:
     branches:
       - stable
       - master
+      - cleanup
     paths-ignore:
       - '**/README.md'
       - 'sirius_doc/**/*'
