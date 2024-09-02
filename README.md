@@ -1,3 +1,5 @@
+# This repository is archived. Please use https://github.com/sirius-ms/sirius to access SIRIUS source code or download the latest SIRIUS [releases](https://github.com/sirius-ms/sirius/releases). 
+
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blueviolet.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Generic badge](https://img.shields.io/badge/Version-5.8.6-informational.svg)](https://shields.io/)
 [![Build and Pubish](https://github.com/boecker-lab/sirius/actions/workflows/distribute.yaml/badge.svg?branch=release-4-pre)](https://github.com/boecker-lab/sirius/actions/workflows/distribute.yaml)
